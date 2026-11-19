@@ -1,63 +1,59 @@
 # nonebot-plugin-group-rank
 
-_✨ 生成群精华榜 / 群发言榜图片。 ✨_
+> 群 **精华榜** / **发言榜** 图片插件。两个榜共用一套渲染与头像缓存，但数据来源不同：
+> 精华榜实时读 NapCat，发言榜用本地 SQLite 统计（只存消息元数据，不存内容）。
 
-<a href="./LICENSE"><img src="https://img.shields.io/github/license/MortisBot/nonebot-plugin-group-rank.svg" alt="license"></a>
-<a href="https://pypi.python.org/pypi/nonebot-plugin-group-rank"><img src="https://img.shields.io/pypi/v/nonebot-plugin-group-rank.svg" alt="pypi"></a>
-<img src="https://img.shields.io/badge/python-3.10+-blue.svg" alt="python">
+## 命令一览
+
+| 命令 | 需要 @ | 说明 |
+|:---:|:---:|:---|
+| `精华榜` | 是 | 当前在库的全部精华，按发送者计数 |
+| `精华榜 7` | 是 | 近 7×24 小时内被设为精华的 |
+| `发言榜` | 是 | 统计窗口内发言次数 Top N |
+
+命令只对 `GROUP_RANK_ESSENCE_GROUPS` / `GROUP_RANK_SPEAK_GROUPS` 里配置的群生效。
 
 ## 安装
-
-在 NoneBot2 项目根目录下执行：
 
 ```bash
 nb plugin install nonebot-plugin-group-rank
 ```
 
-或手动安装：
-
-```bash
-pip install nonebot-plugin-group-rank
-```
-
-并在 `pyproject.toml` 的 `[tool.nonebot]` 中追加：
+手动：`pip install nonebot-plugin-group-rank`，并在 `pyproject.toml` 加：
 
 ```toml
+[tool.nonebot]
 plugins = ["nonebot_plugin_group_rank"]
 ```
 
 ## 配置
 
-在 `.env` 中配置（环境变量名即配置项大写）：
+```dotenv
+GROUP_RANK_ENABLED=true
+GROUP_RANK_ESSENCE_GROUPS=123456789
+GROUP_RANK_SPEAK_GROUPS=123456789
+GROUP_RANK_TOP_N=10
+GROUP_RANK_WINDOW_SECONDS=86400
+GROUP_RANK_BACKFILL_COUNT=1000
+# 可选：自定义底图/字体
+# GROUP_RANK_BACKGROUND=./assets/rank_bg.jpg
+# GROUP_RANK_FONT_DIR=./assets/fonts
+```
 
-| 配置项 | 必填 | 默认值 | 说明 |
-|:---:|:---:|:---:|:---|
-| `GROUP_RANK_ENABLED` | 是 | `false` | 总开关 |
-| `GROUP_RANK_ESSENCE_GROUPS` | 否 | 空 | 精华榜群白名单 |
-| `GROUP_RANK_SPEAK_GROUPS` | 否 | 空 | 发言榜群白名单 |
-| `GROUP_RANK_TOP_N` | 否 | `10` | 榜单人数 |
-| `GROUP_RANK_WINDOW_SECONDS` | 否 | `86400` | 发言榜统计窗口 |
-| `GROUP_RANK_BACKFILL_COUNT` | 否 | `1000` | 发言榜首次回填条数 |
-| `GROUP_RANK_DB_PATH` | 否 | `data/group_rank/group_rank.db` | SQLite 路径 |
-| `GROUP_RANK_BACKGROUND` | 否 | 无 | 自定义底图；不填为纯色渐变 |
-| `GROUP_RANK_FONT_DIR` | 否 | 系统字体 | 字体目录（SourceHanSans OFL） |
+| 变量 | 默认 | 说明 |
+|:---:|:---:|:---|
+| `GROUP_RANK_ENABLED` | `false` | 总开关 |
+| `GROUP_RANK_TOP_N` | `10` | 榜单人数 |
+| `GROUP_RANK_WINDOW_SECONDS` | `86400` | 发言榜窗口 |
+| `GROUP_RANK_BACKFILL_COUNT` | `1000` | 首次命令回填条数上限 |
+| `GROUP_RANK_DB_PATH` | `data/group_rank/group_rank.db` | SQLite 路径 |
 
-## 使用
+## 依赖与边界
 
-| 命令 | 权限 | 需要 @ | 说明 |
-|:---:|:---:|:---:|:---|
-| `精华榜` | 群员 | 是 | 当前在库精华，按发送者计数 |
-| `精华榜 7` | 群员 | 是 | 近 7×24 小时被设为精华的 |
-| `发言榜` | 群员 | 是 | 统计窗口内发言次数 Top N |
-
-需先在对应 `*_GROUPS` 中配置群号。
-
-## 适配器
-
-OneBot v11（`supported_adapters={"~onebot.v11"}`）。
+- OneBot v11；精华榜依赖 NapCat 的 `get_essence_msg_list`，换实现会退化
+- 无底图时回退纯色渐变；字体建议使用 SourceHanSans（OFL）
+- 发言榜首次命令会回填最近最多 1000 条，离线期间消息不补
 
 ## License
 
 [MIT](./LICENSE)
-
-> 维护模式：原项目已停止运营，本插件按 best-effort 维护，无 SLA。
