@@ -62,6 +62,7 @@ __plugin_meta__ = PluginMetadata(
         "@bot 发言榜      配置窗口内的发言次数榜"
     ),
     type="application",
+    homepage="https://github.com/MortisBot/nonebot-plugin-group-rank",
     supported_adapters={"~onebot.v11"},
 )
 
